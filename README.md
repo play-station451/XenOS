@@ -62,7 +62,7 @@ The changelog can be found [here](./CHANGELOG.md)
 ## Contributors
 - [Scaratek](https://github.com/scaratech) - Lead developer
 - [Madjik](https://github.com/madjikdotpng) - Various UI tweaks and logo designer
-- 
+
 Contributions are very much welcome!! Even if it's just fixing my spelling :)
 
 ## Credit
@@ -77,7 +77,7 @@ Contributions are very much welcome!! Even if it's just fixing my spelling :)
 - [JSZip](https://stuk.github.io/jszip/)
 - [libcurl.js](https://github.com/ading2210/libcurl.js)
 - [wisp-client-js](github.com/mercuryworkshop/wisp-client-js)
-- 
+
 There are more dependencies used that are not listed here, for a full list, check the [package.json](https://github.com/NebulaServices/XenOS/blob/main/package.json)
 
 ## What Framework Do You Use?!?
