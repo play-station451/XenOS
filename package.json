@@ -6,13 +6,15 @@
 		"start": "node ./scripts/server.js",
 		"dev": "node ./scripts/dev.js",
 		"dev:windows": "node ./scripts/dev-windows.js",
-		"cloc": "bash ./scripts/cloc.sh"
+		"cloc": "bash ./scripts/cloc.sh",
+		"typedoc": "npx typedoc --entryPointStrategy Expand src"
 	},
 	"devDependencies": {
 		"@types/node": "^24.0.3",
 		"@types/wicg-file-system-access": "^2023.10.6",
 		"esbuild": "^0.25.5",
 		"express": "^5.1.0",
+		"typedoc": "^0.28.13",
 		"typescript": "^5.8.3",
 		"uuid": "^11.1.0",
 		"wisp-server-node": "^1.1.7"
