@@ -3,23 +3,25 @@ name: XenOS CI / Release / Docs
 on:
   push:
     branches: ["**"]
-    tags: ["v*.*.*"]
   pull_request:
-      - name: Checkout (for tagging)
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
     branches: ["**"]
   workflow_dispatch:
 
 permissions:
   contents: write
   pages: write
-          git checkout $GITHUB_SHA
-          git tag -f main $GITHUB_SHA
-          git push origin :refs/tags/main || true
-          git push origin refs/tags/main --force
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: Build (verify)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
         uses: actions/checkout@v4
         with:
           submodules: recursive
@@ -29,7 +31,7 @@ permissions:
         with:
           version: 9
 
-      - name: Check pnpm version
+      - name: pnpm version
         run: pnpm --version
 
       - name: Setup Node.js
@@ -47,14 +49,12 @@ permissions:
           ./scripts/build.sh
 
       - name: Archive production build
-        if: success()
         run: |
           cd build
           zip -r ../xenos-build.zip ./*
           cd ..
 
       - name: Upload build artifact
-        if: success()
         uses: actions/upload-artifact@v4
         with:
           name: xenos-build
@@ -67,19 +67,22 @@ permissions:
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout (full history for tagging)
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
       - name: Download build artifact
         uses: actions/download-artifact@v4
         with:
           name: xenos-build
+
       - name: Force tag 'main' to this commit
         run: |
-          git init -q
-          git remote add origin $GITHUB_SERVER_URL/$GITHUB_REPOSITORY
-          git fetch --depth=1 origin $GITHUB_SHA
-          git checkout -q $GITHUB_SHA
           git tag -f main $GITHUB_SHA
           git push origin :refs/tags/main || true
-          git push origin refs/tags/main
+          git push origin refs/tags/main --force
+
       - name: Generate release notes
         run: |
           echo "Commit: ${GITHUB_SHA}" > release-notes.md
@@ -107,8 +110,6 @@ permissions:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-        with:
-          submodules: recursive
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v2
@@ -129,9 +130,10 @@ permissions:
 
       - name: Prepare docs publish dir
         run: |
-          mkdir -p site
-          if [ -d docs ]; then mkdir -p site/api && cp -R docs/* site/api/; fi
-          if [ ! -f site/index.html ]; then echo '<meta http-equiv="refresh" content="0; url=api/index.html" />' > site/index.html; fi
+          rm -rf site
+          if [ -d docs ]; then mv docs site; else mkdir site; fi
+          echo "docs.xen-os.dev" > site/CNAME
+          if [ ! -f site/index.html ]; then echo "Expected TypeDoc index.html missing" >&2; exit 1; fi
 
       - name: Upload pages artifact
         uses: actions/upload-pages-artifact@v3
