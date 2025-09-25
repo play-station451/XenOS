@@ -93,7 +93,7 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           tag_name: main
-          name: XenOS main
+          name: XenOS
           body_path: release-notes.md
           files: |
             xenos-build.zip
