@@ -5,20 +5,21 @@ on:
     branches: ["**"]
     tags: ["v*.*.*"]
   pull_request:
+      - name: Checkout (for tagging)
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
     branches: ["**"]
   workflow_dispatch:
 
 permissions:
   contents: write
   pages: write
-  id-token: write
-
-jobs:
-  build:
-    name: Build (verify)
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
+          git checkout $GITHUB_SHA
+          git tag -f main $GITHUB_SHA
+          git push origin :refs/tags/main || true
+          git push origin refs/tags/main --force
         uses: actions/checkout@v4
         with:
           submodules: recursive
