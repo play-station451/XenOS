@@ -111,6 +111,9 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+
       - name: Setup pnpm
         uses: pnpm/action-setup@v2
         with:
@@ -128,12 +131,28 @@ jobs:
       - name: Generate TypeDoc site
         run: pnpm typedoc
 
+      - name: Diagnose TypeDoc output
+        run: |
+          echo '--- TypeDoc top-level files (first 60) ---'
+          if [ -d docs ]; then find docs -maxdepth 2 -type f -printf '%P\n' | sort | head -60; else echo 'docs/ missing'; fi
+          if [ -f docs/index.html ]; then echo 'Found docs/index.html'; else echo 'MISSING docs/index.html'; fi
+          echo 'Docs directory size:'
+          du -sh docs || true
+
       - name: Prepare docs publish dir
         run: |
           rm -rf site
           if [ -d docs ]; then mv docs site; else mkdir site; fi
           echo "docs.xen-os.dev" > site/CNAME
+          touch site/.nojekyll
           if [ ! -f site/index.html ]; then echo "Expected TypeDoc index.html missing" >&2; exit 1; fi
+
+      - name: Upload TypeDoc artifact (debug)
+        uses: actions/upload-artifact@v4
+        with:
+          name: typedoc-site
+          path: site
+          retention-days: 3
 
       - name: Upload pages artifact
         uses: actions/upload-pages-artifact@v3
